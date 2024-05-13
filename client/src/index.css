@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-body{
+body {
   background-color: rgb(226 232 240);
+}
+
+h1 {
+  color: rgb(71 85 105);
 }

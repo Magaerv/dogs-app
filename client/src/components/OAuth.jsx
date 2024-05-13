@@ -34,7 +34,7 @@ export const OAuth = () => {
       navigate('/')
     } catch (error) {
       dispatch(signInFailure(error.message))
-      console.log('could not sign in with google', error)
+      console.log('could not sign in with Google', error)
     }
   }
 
