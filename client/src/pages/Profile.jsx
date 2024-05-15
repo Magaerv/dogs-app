@@ -1,20 +1,24 @@
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from 'react-router-dom'
 import { app } from "../firebase"
-import { updateUserFailure, updateUserStart, updateUserSuccess } from '../redux/user/userSlice'
+import { updateUserFailure, updateUserStart, updateUserSuccess, deleteUserFailure, deleteUserStart, deleteUserSuccess } from '../redux/user/userSlice'
+
 
 export default function Profile() {
 
   const fileRef = useRef(null)
 
-  const { currentUser } = useSelector(state => state.user)
+  const { currentUser, loading, error } = useSelector(state => state.user)
   const [file, setFile] = useState(undefined)
   const [fileUploading, setFileUploading] = useState(0)
   const [fileError, setFileError] = useState(false)
   const [formData, setFormData] = useState({})
-  const { loading } = useSelector((state) => state.user)
+  const [updateSuccess, setUpdateSuccess] = useState(false)
+
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (file) {
@@ -72,10 +76,31 @@ export default function Profile() {
         return
       }
       dispatch(updateUserSuccess(data))
+      setFileUploading(0)
+      setUpdateSuccess(true)
 
     } catch (error) {
       dispatch(updateUserFailure(error.message))
     }
+  }
+
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart())
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: 'DELETE'
+      })
+      const data = await res.json()
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message))
+        return
+      }
+      dispatch(deleteUserSuccess(data))
+      navigate('/sign-in')
+    } catch (error) {
+      dispatch(updateUserFailure(error.message))
+    }
+
   }
 
   return (
@@ -103,13 +128,15 @@ export default function Profile() {
         <input type="password" placeholder="password" id='password' className="border p-3 rounded-lg mt-7" value={formData.password || currentUser?.password}
           onChange={handleChange}
           autoComplete="off" />
-        <button className="bg-slate-600 text-white rounded-lg p-3 uppercase hover:opacity-90 disabled:opacity-70">{loading ? 'Loading...' : 'Update'}
+        <button disabled={loading} className="bg-slate-600 text-white rounded-lg p-3 uppercase hover:opacity-90 disabled:opacity-70">{loading ? 'Loading...' : 'Update'}
         </button>
       </form>
       <div className='flex justify-between mt-5'>
-        <span className='text-red-500'>Delete Account</span>
+        <span className='text-red-500 cursor-pointer' onClick={handleDeleteUser}>Delete Account</span>
         <span className='text-red-500'>Sign Out</span>
       </div>
+      <p className='text-red-700 mt-5'>{error ? error : ''}</p>
+      <p className='text-green-800 mt-5'>{ updateSuccess ? 'User is updated successfully': ''}</p>
     </div>
   )
 }
