@@ -3,6 +3,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import userRouter from './routes/user.route.js'
 import authRouter from './routes/auth.route.js'
+import dogRouter from './routes/dog.route.js'
 import cookieParser from 'cookie-parser'
 
 dotenv.config()
@@ -30,6 +31,8 @@ app.listen(3000, () => {
 
 app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
+app.use('/api/dog', dogRouter)
+
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500
   const message = err.message || 'Internal server error'
