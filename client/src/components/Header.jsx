@@ -8,7 +8,7 @@ export default function Header() {
 
   const { currentUser } = useSelector(state => state.user)
 
-  console.log(currentUser)
+
   return (
     <header className="bg-slate-200 shadow-md">
       <div className="flex justify-between items-center max-w-6xl mx-auto p-3">
@@ -31,7 +31,7 @@ export default function Header() {
           </Link>
           <Link to={currentUser ? '/profile': '/sign-in'}>
             {currentUser ? (
-              <img className='rounded-full h-7 w-7 object-cover opacity-50' src={currentUser?.avatar || currentUser?.rest.avatar} alt='' />
+              <img className='rounded-full h-7 w-7 object-cover opacity-90' src={currentUser?.avatar || currentUser?.avatar} alt='' />
             ) : <li className = 'sm:inline text-slate-500 hover:text-slate-600'>Sign In</li>
           }
           </Link>
