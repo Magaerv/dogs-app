@@ -6,6 +6,7 @@ import Home from './pages/Home'
 import Profile from './pages/Profile'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
+import { CreateDog } from './pages/CreateDog'
 
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
       <Route path='/about' element={<About />} />
       <Route pathelement={PrivateRoutes}>
         <Route path='/profile' element={<Profile />} />
+        <Route path='/create-dog' element={<CreateDog />} />
       </Route>
     </Routes>
   </BrowserRouter>

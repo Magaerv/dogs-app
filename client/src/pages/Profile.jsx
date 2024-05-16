@@ -1,7 +1,7 @@
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { app } from "../firebase"
 import { deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutFailure, signOutStart, signOutSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from '../redux/user/userSlice'
 
@@ -146,6 +146,7 @@ export default function Profile() {
           autoComplete="off" />
         <button disabled={loading} className="bg-slate-600 text-white rounded-lg p-3 uppercase hover:opacity-90 disabled:opacity-70">{loading ? 'Loading...' : 'Update'}
         </button>
+        <Link className='bg-green-800 text-white p-3 rounded-lg uppercase text-center hover:opacity-90' to={'/create-dog'}>Create New Dog</Link>
       </form>
       <div className='flex justify-between mt-5'>
         <span className='text-red-500 cursor-pointer' onClick={handleDeleteUser}>Delete Account</span>
