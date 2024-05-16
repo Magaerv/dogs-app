@@ -136,7 +136,8 @@ export default function Profile() {
             ''
           )}
         </p>
-        <input type="text" placeholder="username" id='username' className="border p-3 rounded-lg mt-7" value={formData.username || currentUser?.username}
+        <input type="text"
+          placeholder="username" id='username' className="border p-3 rounded-lg mt-7" value={formData.username || currentUser?.username}
           onChange={handleChange}
           autoComplete="off" />
         <input type="text" placeholder="email" id='email' className="border p-3 rounded-lg mt-7" value={formData.email || currentUser?.email} onChange={handleChange}
@@ -150,7 +151,7 @@ export default function Profile() {
       </form>
       <div className='flex justify-between mt-5'>
         <span className='text-red-500 cursor-pointer' onClick={handleDeleteUser}>Delete Account</span>
-        <span className='text-red-500' onClick={handleLogout}>Sign Out</span>
+        <span className='text-red-500 cursor-pointer' onClick={handleLogout}>Sign Out</span>
       </div>
       <p className='text-red-700 mt-5'>{error ? error : ''}</p>
       <p className='text-green-800 mt-5'>{updateSuccess ? 'User is updated successfully' : ''}</p>

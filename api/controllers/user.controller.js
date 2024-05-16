@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import User from '../models/user.model.js'
 import { errorHandler } from '../utils/error.js'
+import Dog from '../models/dog.model.js'
 
 
 export const test = (req, res) => {
@@ -38,4 +39,18 @@ export const deleteUser = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+}
+
+export const getUserDogs = async (req, res, next) => {
+    if (req.user.id === req.params.id) {
+      try {
+        const userDogs = await Dog.find({ userRef: req.params.id })
+        res.status(200).json(userDogs)
+      } catch (error) {
+        next(error)
+      }
+    } else {
+      return next(errorHandler(401, 'You can only view your own dogs'))
+    }
+
 }
