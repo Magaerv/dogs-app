@@ -20,6 +20,7 @@ export default function App() {
       <Route pathelement={PrivateRoutes}>
         <Route path='/profile' element={<Profile />} />
         <Route path='/create-dog' element={<CreateDog />} />
+        <Route path='/dog/:id' element={<h1>dogs lists</h1>} />
       </Route>
     </Routes>
   </BrowserRouter>

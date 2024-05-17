@@ -2,12 +2,12 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/
 import { useState } from "react"
 import { useSelector } from 'react-redux'
 import { app } from "../firebase"
-import {useNavigate} from 'react-router-dom'
+//import {useNavigate} from 'react-router-dom'
 
 export const CreateDog = () => {
 
   const { currentUser } = useSelector(state => state.user)
-   const navigate = useNavigate()
+   //const navigate = useNavigate()
 
   const [files, setFiles] = useState([])
   const [formData, setFormData] = useState({
@@ -104,7 +104,8 @@ export const CreateDog = () => {
       if (data.success === false) {
         setError(data.message)
       }
-      navigate(`/dog/${data._id}`)
+      console.log(data)
+     // navigate(`/dog/${data._id}`)
     } catch (error) {
       setError(error.message)
       setLoading(false)

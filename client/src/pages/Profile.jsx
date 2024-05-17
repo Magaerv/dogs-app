@@ -16,6 +16,8 @@ export default function Profile() {
   const [fileError, setFileError] = useState(false)
   const [formData, setFormData] = useState({})
   const [updateSuccess, setUpdateSuccess] = useState(false)
+  const [showDogsError, setShowDogsError] = useState(false)
+  const [userDogs, setUserDogs] = useState([])
 
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -116,11 +118,41 @@ export default function Profile() {
     } catch (error) {
       dispatch(signOutFailure(error.message))
     }
+  }
 
+  const handleShowDog = async () => {
+    try {
+      setShowDogsError(false)
+      const res = await fetch(`/api/user/dogs/${currentUser._id}`)
+      const data = await res.json()
+      if (data.success === false) {
+        setShowDogsError(true)
+        return
+      }
+      setUserDogs(data)
+    } catch (error) {
+      setShowDogsError(true)
+    }
+  }
+
+  const handleDeleteDog = async (dogId) => {
+    try {
+      const res = await fetch(`/api/dog/delete/${dogId}`, {
+        method: "DELETE"
+      })
+      const data = await res.json()
+      if (data.success === false) {
+        console.log(data.message)
+        return
+      }
+      setUserDogs((prev)=> prev.filter((dog)=> dog._id !== dogId))
+    } catch (error) {
+      console.log(error.message)
+    }
   }
 
   return (
-    <div className="p-3 max-w-lg mx-auto">
+    <div className="p-3 max-w-lg mx-auto my-auto">
       <h1 className="text-3xl font-semibold text-center my-7">My Account</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input onChange={(e) => setFile(e.target.files[0])} type='file' ref={fileRef} hidden accept='image/*' />
@@ -155,6 +187,32 @@ export default function Profile() {
       </div>
       <p className='text-red-700 mt-5'>{error ? error : ''}</p>
       <p className='text-green-800 mt-5'>{updateSuccess ? 'User is updated successfully' : ''}</p>
+      <button onClick={handleShowDog} className='text-slate-700 w-full cursor-pointer'>Show dogs</button>
+      <p className='text-red-500 mt-5'>{showDogsError ? 'Error showing dogs' : ''}</p>
+      {
+        userDogs &&
+        userDogs.length > 0 &&
+        <div className='flex flex-col gap-4 justify-between'>
+            <h1 className='text-center mt-7 text-2xl font-semibold'>Your Dogs</h1>
+          {userDogs?.map((dog) => {
+            return (
+              <div key={dog._id} className='border rounded-lg p-3 flex justify-between items-center gap-4'>
+                <Link to={`/dog/${dog._id}`}>
+                  <img src={dog.image[0]} alt='dog image cover' className='h-14 w-13 object-contain' />
+                </Link>
+                <Link className='text-slate-600 font-semibold flex-1 hover:underline truncate' to={`/dog/${dog._id}`}>
+                  <p className='font-bold'>{dog.name}</p>
+                </Link>
+                <div className='flex flex-col items-center'>
+                  <button
+                    onClick={()=> handleDeleteDog(dog._id)} className='text-red-600 uppercase'>Delete</button>
+                  <button className='text-green-700 uppercase'>Edit</button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      }
     </div>
   )
 }
