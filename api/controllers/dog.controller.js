@@ -28,3 +28,27 @@ export const deleteDog = async (req, res, next) => {
     next(error)
   }
 }
+
+
+export const updateDog = async (req, res, next) => {
+  const dog = await Dog.findById(req.params.id)
+
+  if (!dog) {
+    return next(errorHandler(404, 'Dog not found.'))
+  }
+
+  if (req.user.id !== dog.userRef) {
+    return next(errorHandler(401, 'You can only update your own dogs.'))
+  }
+
+  try {
+    const updatedDog = await Dog.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    )
+    res.status(200).json(updatedDog)
+  } catch (error) {
+    next(error)
+  }
+}
