@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { Link, useNavigate } from 'react-router-dom'
 import { app } from "../firebase"
 import { deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutFailure, signOutStart, signOutSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from '../redux/user/userSlice'
+import { FaRegArrowAltCircleDown } from "react-icons/fa";
 
 
 export default function Profile() {
@@ -62,6 +63,7 @@ export default function Profile() {
     e.preventDefault()
     try {
       dispatch(updateUserStart())
+      setUpdateSuccess(false)
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
         method: 'POST',
         headers: {
@@ -151,6 +153,8 @@ export default function Profile() {
     }
   }
 
+  console.log("CurrentUser", currentUser)
+
   return (
     <div className="p-3 max-w-lg mx-auto my-auto">
       <h1 className="text-3xl font-semibold text-center my-7">My Account</h1>
@@ -187,7 +191,7 @@ export default function Profile() {
       </div>
       <p className='text-red-700 mt-5'>{error ? error : ''}</p>
       <p className='text-green-800 mt-5'>{updateSuccess ? 'User is updated successfully' : ''}</p>
-      <button onClick={handleShowDog} className='text-slate-700 w-full cursor-pointer'>Show dogs</button>
+      <button onClick={handleShowDog} className="w-full rounded-lg p-2 hover:opacity-95 font-semibold text-slate-500 bg-slate-300"><span className='inline-flex '><FaRegArrowAltCircleDown /></span> Show dogs</button>
       <p className='text-red-500 mt-5'>{showDogsError ? 'Error showing dogs' : ''}</p>
       {
         userDogs &&
@@ -205,8 +209,10 @@ export default function Profile() {
                 </Link>
                 <div className='flex flex-col items-center'>
                   <button
-                    onClick={()=> handleDeleteDog(dog._id)} className='text-red-600 uppercase'>Delete</button>
+                    onClick={() => handleDeleteDog(dog._id)} className='text-red-600 uppercase'>Delete</button>
+                  <Link to={`/update-dog/${dog._id}` }>
                   <button className='text-green-700 uppercase'>Edit</button>
+                  </Link>
                 </div>
               </div>
             )

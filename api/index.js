@@ -5,6 +5,7 @@ import userRouter from './routes/user.route.js'
 import authRouter from './routes/auth.route.js'
 import dogRouter from './routes/dog.route.js'
 import cookieParser from 'cookie-parser'
+import temperamentRouter from './routes/temperament.route.js'
 
 dotenv.config()
 
@@ -32,6 +33,7 @@ app.listen(3000, () => {
 app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/dog', dogRouter)
+app.use('/api/temperament', temperamentRouter)
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500

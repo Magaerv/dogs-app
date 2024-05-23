@@ -7,6 +7,8 @@ import Profile from './pages/Profile'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import { CreateDog } from './pages/CreateDog'
+import { UpdateDog } from './pages/UpdateDog'
+import { Dog } from './pages/Dog'
 
 
 export default function App() {
@@ -20,8 +22,9 @@ export default function App() {
       <Route pathelement={PrivateRoutes}>
         <Route path='/profile' element={<Profile />} />
         <Route path='/create-dog' element={<CreateDog />} />
-        <Route path='/dog/:id' element={<h1>dogs lists</h1>} />
+        <Route path='/update-dog/:dogId' element={<UpdateDog />} />
       </Route>
+      <Route path='/dog/:id' element={<Dog/>} />
     </Routes>
   </BrowserRouter>
 }

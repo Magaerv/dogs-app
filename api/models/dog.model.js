@@ -5,31 +5,48 @@ const dogSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true,
+    trim: true,
   },
   image: {
-    type: Array,
+    type: [String],
     required: true,
   },
   height: {
-    type: String,
-    required: true,
+    metric: {
+      type: String,
+      default: "",
+    }
   },
   weight: {
+    metric: {
+      type: String,
+      default: "",
+    }
+  },
+  bred_for: {
     type: String,
-    required: true,
+    default: "",
+  },
+  breed_group: {
+    type: String,
+    default: "",
   },
   life_span: {
     type: String,
-    required: true,
+    default: "",
   },
+  temperament: [{
+    type: String,
+    ref: 'Temperament',
+    required: true,
+  }],
   origin: {
     type: String,
-    required: true,
+    default: "",
   },
-  createBD: {
-    type: Boolean,
-    default: true,
-    required: true,
+  description: {
+    type: String,
+    default: "",
   },
   userRef: {
     type: String,
