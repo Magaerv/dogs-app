@@ -162,6 +162,7 @@ export default function Profile() {
         <input onChange={(e) => setFile(e.target.files[0])} type='file' ref={fileRef} hidden accept='image/*' />
         <img onClick={() => fileRef.current.click()} className='rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2 opacity-90' src={formData.avatar || currentUser?.avatar} alt='' />
         <p className='text-sm self-center'>
+         <span className='text-slate-500 font-semibold flex-col flex justify-center text-lg text-center'>{formData.username || currentUser?.username}</span>
           {fileError ? (
             <span className='text-red-500'>Error image upload (Image must be less than 2 mb)</span>
           ) : fileUploading > 0 && fileUploading < 100 ? (
@@ -190,7 +191,7 @@ export default function Profile() {
         <span className='text-red-500 cursor-pointer' onClick={handleLogout}>Sign Out</span>
       </div>
       <p className='text-red-700 mt-5'>{error ? error : ''}</p>
-      <p className='text-green-800 mt-5'>{updateSuccess ? 'User is updated successfully' : ''}</p>
+      <p className='text-green-800 my-5 flex flex-col justify-center text-center'>{updateSuccess ? 'User updated successfully!' : ''}</p>
       <button onClick={handleShowDog} className="w-full rounded-lg p-2 hover:opacity-95 font-semibold text-slate-500 bg-slate-300"><span className='inline-flex '><FaRegArrowAltCircleDown /></span> Show dogs</button>
       <p className='text-red-500 mt-5'>{showDogsError ? 'Error showing dogs' : ''}</p>
       {
