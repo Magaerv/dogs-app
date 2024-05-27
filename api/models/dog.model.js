@@ -52,6 +52,12 @@ const dogSchema = new mongoose.Schema({
     type: String,
     required: true,
   }
+  ,
+  fromDb: {
+    type: Boolean,
+    default: true,
+  }
+
 },
   { timestamps: true }
 )
