@@ -51,13 +51,3 @@ export const getTemperaments = async (req, res, next) => {
     return next(error)
   }
 }
-
-export const getTemperamentByName = async (req, res, next) => {
-  try {
-    const dog = req.body
-   console.log(dog)
-   
-  } catch (error) {
-    return next(error)
-  }
-}

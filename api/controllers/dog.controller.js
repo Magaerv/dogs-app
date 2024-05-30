@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import Dog from '../models/dog.model.js'
 import Temperament from '../models/temperament.model.js'
 import { errorHandler } from '../utils/error.js'
@@ -75,9 +76,12 @@ export const updateDog = async (req, res, next) => {
 
 export const getDog = async (req, res, next) => {
   try {
-    const dog = await Dog.findById(req.params.id)
-    if (!dog) {
-      const response = await fetch(process.env.API_URL / `${req.params.id}`, {
+    const id = req.params.id
+    
+    const isDatabaseId = mongoose.Types.ObjectId.isValid(id)
+
+    if (!isDatabaseId) {
+      const response = await fetch(`${process.env.API_URL}`, {
         headers: {
           'x-api-key': process.env.API_KEY
         }
@@ -87,69 +91,137 @@ export const getDog = async (req, res, next) => {
         return next(errorHandler(404, 'Dog not found'))
       }
 
-      const apiDog = await response.json()
-      return res.status(200).json(apiDog)
+      const apiData = await response.json();
+
+      const apiDog = apiData.find(dog => dog.id == id)
+
+      if (!apiDog) {
+        return next(errorHandler(404, 'Dog not found'))
+      }
+
+      return res.status(200).json(apiDog);
+    } else {
+      const dog = await Dog.findById(id)
+      if (!dog) {
+        return next(errorHandler(404, 'Dog not found'))
+      }
+      res.status(200).json(dog)
     }
-    res.status(200).json(dog)
   } catch (error) {
     next(error)
   }
-}
+};
 
 
-export const getDogs = async (req, res, next) => {
-  try {
-    const limit = parseInt(req.query.limit) || 12
-    const startIndex = parseInt(req.query.startIndex) || 0
-    const searchTerm = req.query.searchTerm || ''
-    const sort = req.query.sort || 'createdAt'
-    const order = req.query.order === 'asc' ? 1 : -1
-    const fromDb = req.query.fromDb === 'true'
-    const fromApi = req.query.fromApi === 'true'
+  export const getDogs = async (req, res, next) => {
+    try {
+      const limit = parseInt(req.query.limit) || 30
+      const startIndex = parseInt(req.query.startIndex) || 0
+      const searchTerm = req.query.searchTerm || ''
+      const sort = req.query.sort || 'createdAt'
+      const order = req.query.order === 'asc' ? 1 : -1
+      const fromDb = req.query.fromDb === 'true'
+      const fromApi = req.query.fromApi === 'true'
 
-    let dbDogs = []
-    let apiDogs = []
+      let dbDogs = []
+      let apiDogs = []
 
-    if (fromDb) {
-      dbDogs = await Dog.find({
-        name: { $regex: searchTerm, $options: 'i' },
-      }).lean()
-    }
-
-   if (fromApi) {
-      const response = await fetch(process.env.API_URL, {
-        headers: {
-          'x-api-key': process.env.API_KEY,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error('Error fetching data from external API')
+      if (fromDb || !fromDb && !fromApi) {
+        dbDogs = await Dog.find({
+          name: { $regex: searchTerm, $options: 'i' },
+        }).lean().exec()
       }
 
-      const apiDogsResponse = await response.json()
+      if (fromApi || (!fromApi && !fromDb)) {
+        const response = await fetch(process.env.API_URL, {
+          headers: {
+            'x-api-key': process.env.API_KEY,
+          },
+        })
 
-      apiDogs = apiDogsResponse
-        .filter(dog => dog.name.toLowerCase().includes(searchTerm.toLowerCase()))
-        .map(dog => ({ ...dog, fromDb: false }))
+        if (!response.ok) {
+          throw new Error('Error fetching data from external API')
+        }
+
+        const apiDogsResponse = await response.json()
+
+        apiDogs = apiDogsResponse
+          .filter(dog => dog.name.toLowerCase().includes(searchTerm.toLowerCase()))
+          .map(dog => ({ ...dog, fromDb: false }))
+      }
+
+      let combinedDogs = []
+      if ((fromDb && fromApi) || (!fromDb && !fromApi)) {
+        combinedDogs = [...dbDogs, ...apiDogs]
+      } else if (fromDb) {
+        combinedDogs = dbDogs
+      } else if (fromApi) {
+        combinedDogs = apiDogs
+      }
+
+      combinedDogs.sort((a, b) => {
+        if (a[sort] < b[sort]) return order === 1 ? -1 : 1
+        if (a[sort] > b[sort]) return order === 1 ? 1 : -1
+        return 0
+      })
+
+      const paginatedDogs = combinedDogs.slice(startIndex, startIndex + limit)
+
+      if (!paginatedDogs.length) {
+        return next(new Error('Dogs not found'))
+      }
+
+      return res.status(200).json(paginatedDogs)
+    } catch (error) {
+      next(error)
     }
+}
+  
 
-    const combinedDogs = [...dbDogs, ...apiDogs]
+export const getDogsByTemperament = async (req, res, next) => {
+  try {
+    const { temp } = req.params
 
-    combinedDogs.sort((a, b) => {
-      if (a[sort] < b[sort]) return order === 1 ? -1 : 1
-      if (a[sort] > b[sort]) return order === 1 ? 1 : -1
-      return 0
+    const regex = new RegExp(`^${temp}$`, 'i')
+
+    const dogs = await Dog.find({
+      $or: [{
+        temperament: {
+          $elemMatch: { $regex: regex }
+        }
+      }]
     })
 
-    const paginatedDogs = combinedDogs.slice(startIndex, startIndex + limit)
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.API_KEY
+    })
 
-    if (!paginatedDogs.length) {
-      return next(errorHandler(404, 'Dogs not found'))
+    const requestOptions = {
+      method: 'GET',
+      headers: headers,
+      redirect: 'follow'
+    };
+
+    const response = await fetch(process.env.API_URL, requestOptions)
+    const apiData = await response.json();
+
+    const apiDogs = apiData.filter(dog => {
+      if (dog.temperament) {
+        const temperaments = dog.temperament.split(',').map(temp => temp.trim())
+        return temperaments.some(t => regex.test(t))
+      }
+      return false
+    });
+
+    const combinedDogs = [...dogs, ...apiDogs]
+
+    if (combinedDogs.length === 0) {
+      return res.status(404).json({ message: 'No dogs found with the specified temperament' })
     }
 
-    return res.status(200).json(paginatedDogs)
+    return res.status(200).json(combinedDogs);
   } catch (error) {
-    next(error)
+    return next(error)
   }
 }

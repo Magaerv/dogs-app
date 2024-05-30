@@ -13,12 +13,24 @@ export const UpdateDog = () => {
   const [files, setFiles] = useState([])
   const [temperaments, setTemperaments] = useState([])
   const [selectedTemperaments, setSelectedTemperaments] = useState([])
-  const [formData, setFormData] = useState(null)
+//  const [dog, setDog] = useState(null)
+  const [formData, setFormData] = useState({
+    name: '',
+    image: [],
+    height: '',
+    weight: '',
+    bred_for: '',
+    breed_group: '',
+    life_span: '',
+    origin: '',
+    description: '',
+  })
   const [imageError, setImageError] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
   const [updateSuccess, setUpdateSuccess] = useState(false)
+
 
   useEffect(() => {
     const fetchDog = async () => {
@@ -31,10 +43,22 @@ export const UpdateDog = () => {
           setError(true)
           setLoading(false)
           return
+        } else {
+     //     setDog(data)
+          setFormData({
+            name: data.name,
+            image: data.image,
+            height: data.height.metric,
+            weight: data.weight.metric,
+            bred_for: data.bred_for,
+            breed_group: data.breed_group,
+            life_span: data.life_span,
+            origin: data.origin,
+            description: data.description,
+            temperament: data.temperament,
+          })
         }
-
-        setFormData({ ...data })
-
+        setSelectedTemperaments(data.temperament || [])
         setLoading(false)
         setError(false)
       } catch (error) {
@@ -125,40 +149,47 @@ export const UpdateDog = () => {
     }
   }
 
-  console.log(selectedTemperaments.join(', '))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       if (formData.image.length < 1) return setError('You must upload at least 1 image')
       setUpdateSuccess(false)
-      if (selectedTemperaments) {
-        const dogWithNewTemp = {
-          ...formData,
-          temperament: selectedTemperaments
-        }
-
-        const dogData = dogWithNewTemp ? dogWithNewTemp : formData
-        setLoading(true)
-        setError(false)
-        const res = await fetch(`/api/dog/update/${params.dogId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...dogData,
-            userRef: currentUser._id
-          })
-        })
-        const data = await res.json()
-        setLoading(false)
-        if (data.success === false) {
-          setError(data.message)
-        }
-        setUpdateSuccess(true)
+      
+      const hw = {
+        height: { metric: formData.height },
+        weight: { metric: formData.weight }
+      };
+      
+      const dogData = {
+        ...formData,
+        ...hw,
+        temperament: selectedTemperaments.length > 0 ? selectedTemperaments : formData.temperament
       }
 
+      setLoading(true)
+      setError(false)
+      const res = await fetch(`/api/dog/update/${params.dogId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...dogData,
+          userRef: currentUser._id
+        })
+      })
+      const data = await res.json()
+     
+      if (data.success === false) {
+        setError(data.message)
+      }
+      else {
+      //  setDog(data);
+        setUpdateSuccess(true)
+      }
+      setUpdateSuccess(true)
+       setLoading(false)
     } catch (error) {
       setError(error.message)
       setLoading(false)
@@ -174,9 +205,9 @@ export const UpdateDog = () => {
           <label htmlFor="name" className="font-semibold text-slate-600">Name: <span className='font-normal text-slate-500'></span></label>
           <input type="text" placeholder="e.g.: American Dogui" className="border p-3 mb-4 rounded-lg" name='name' minLength='3' required onChange={handleChange} value={formData?.name} />
           <label htmlFor="height" className="font-semibold text-slate-600">Height (cm): <span className='font-normal text-slate-500'>Enter average height or range (min-max)</span></label>
-          <input type="text" placeholder="e.g.: 90 - 150 cm" className="border p-3 mb-4 rounded-lg" name='height' onChange={handleChange} value={formData?.height.metric} />
+          <input type="text" placeholder="e.g.: 90 - 150 cm" className="border p-3 mb-4 rounded-lg" name='height' onChange={handleChange} value={formData?.height} />
           <label htmlFor="weight" className="font-semibold text-slate-600">Weight (kg): <span className='font-normal text-slate-500'>Enter average weight or range (min-max)</span></label>
-          <input type="text" placeholder="e.g.: 5 - 9 kg" className="border p-3 mb-4 rounded-lg" name='weight' onChange={handleChange} value={formData?.weight.metric} />
+          <input type="text" placeholder="e.g.: 5 - 9 kg" className="border p-3 mb-4 rounded-lg" name='weight' onChange={handleChange} value={formData?.weight} />
           <label htmlFor="bred_for" className="font-semibold text-slate-600">Bred for: <span className='font-normal text-slate-500'></span></label>
           <input type="text" placeholder="e.g.: Family companion dog" className="border p-3 mb-4 rounded-lg" name='bred_for' onChange={handleChange} value={formData?.bred_for} />
           <label htmlFor="breed_group" className="font-semibold text-slate-600">Breed group: <span className='font-normal text-slate-500'></span></label>
@@ -195,9 +226,9 @@ export const UpdateDog = () => {
               <option key={temp.name} value={temp.name}>{temp.name}</option>
             ))}
           </select>
-          {formData?.temperament?.length > 0
+          {formData?.temperament
             ? (<p className="font-semibold text-slate-600 ">
-              {formData?.temperament.length > 0 ? "Temperaments:" : ''} <span className="font-normal text-slate-500">{formData?.temperament.join(', ')}</span></p>)
+              {formData?.temperament ? "Temperaments:" : ''} <span className="font-normal text-slate-500">{formData?.temperament.join(', ')}</span></p>)
             : ''
           }
           {

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
-import { Link, useParams } from "react-router-dom"
-import { FaMapMarker, FaShare } from 'react-icons/fa'
+import { FaShare } from 'react-icons/fa'
 import { useSelector } from 'react-redux'
-import { Navigation } from 'swiper/modules'
-import { Swiper, SwiperSlide } from 'swiper/react'
+import { Link, useParams } from "react-router-dom"
 import 'swiper/css'
 import 'swiper/css/navigation'
-
+import { Navigation } from 'swiper/modules'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import {MdLocationOn} from 'react-icons/md'
 export const Dog = () => {
 
 
@@ -32,6 +32,7 @@ export const Dog = () => {
           return
         }
         setDog(data)
+        console.log(data)
         setLoading(false)
         setError(false)
       } catch (error) {
@@ -72,14 +73,17 @@ export const Dog = () => {
         dog && !loading && !error && (
           <div className='my-auto'>
             <Swiper modules={[Navigation]} navigation spaceBetween={0}
-              slidesPerView={dog.image.length == 1 ? 1 : 2} >
-              {dog.image.length > 0 &&
+              slidesPerView={1} >
+              {dog?.fromDb ?
                 dog.image.map((url) => (
                   <SwiperSlide key={url}>
-                    <div className="h-[400px]" style={{ background: `url("${url}") center no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)'}}>
+                    <div className="h-[500px]" style={{ background: `url("${url}") no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
                     </div>
                   </SwiperSlide>
-                ))
+                )) : <SwiperSlide>
+                  <div className="h-[500px]" style={{ background: `url("${dog.image.url}") no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
+                  </div>
+                </SwiperSlide>
               }
             </Swiper>
             <div className="fixed top-[13%] right-[3%] z-10 border rounded-full w-11 h-11 flex justify-center items-center bg-slate-300 cursor-pointer">
@@ -93,7 +97,7 @@ export const Dog = () => {
                 }} />
             </div>
             {copied && (
-              <p className="fixed top-[23%] right-[5%] z-10 rounded-md p-2 text-slate-700">
+              <p className="fixed top-[23%] right-[5%] z-10 rounded-md p-2 text-slate-700 bg-slate-200">
                 Link copied!
               </p>
             )}
@@ -110,18 +114,25 @@ export const Dog = () => {
                   )}
                 </div>
                 <div className="flex gap-2 mb-4">
-                  <FaMapMarker className="text-green-700 text-2xl" />
-                  <span className="text-slate-800 font-semibold text-lg">({dog.origin})</span>
+                  {
+                    dog.origin && <>
+                      <MdLocationOn className="text-green-700 text-2xl" />
+                      <span className="text-slate-800 font-semibold text-lg">{dog.origin}</span>
+                    </>
+                  }
                 </div>
                 <div className="p-1 m-3 text-slate-800 gap-4">
-                  <p className="pb-2"><span className="font-bold">Height:</span> {dog.height.metric}</p>
-                  <p className="pb-2"><span className="font-bold">Weight:</span> {dog.weight.metric}</p>
-                  <p className="pb-2"><span className="font-bold">Bred for:</span> {dog.bred_for}</p>
-                  <p className="pb-2"><span className="font-bold">Breed group:</span> {dog.breed_group}</p>
-                  <p className="pb-2"><span className="font-bold">Life Span:</span> {dog.life_span}</p>
-                  <p className="pb-2"><span className="font-bold">Temperaments:</span> {dog?.temperament.join(', ')}</p>
-                  <p className="pb-2"><span className="font-bold">Country of origin:</span> {dog.origin}</p>
-                  <p className="pb-2"><span className="font-bold">Description:</span> {dog.description}</p>
+                  {dog && <p className="pb-2"><span className="font-bold">Height:</span> {dog.height.metric || dog.height} cm.</p>}
+                  {dog && <p className="pb-2"><span className="font-bold">Weight:</span> {dog.weight.metric || dog.weight} kg.</p>}
+                  {dog.bred_for && <p className="pb-2"><span className="font-bold">Bred for:</span> {dog.bred_for}</p>}
+                  {dog.breed_group && <p className="pb-2"><span className="font-bold">Breed group:</span> {dog.breed_group}</p>}
+                  {dog.life_span && <p className="pb-2"><span className="font-bold">Life Span:</span> {dog.life_span}</p>}
+                  {dog.fromDb
+                    ? (<p className="pb-2"><span className="font-bold">Temperaments:</span> {dog.temperament.join(', ')}</p>)
+                    : (<p className="pb-2"><span className="font-bold">Temperaments:</span> {dog.temperament}</p>)
+                  }
+                  {dog.origin && <p className="pb-2"><span className="font-bold">Country of origin:</span> {dog.origin}</p>}
+                  {dog.description && <p className="pb-2"><span className="font-bold">Description:</span> {dog.description}</p>}
                 </div>
               </div>
             </div>

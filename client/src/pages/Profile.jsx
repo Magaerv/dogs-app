@@ -116,7 +116,7 @@ export default function Profile() {
         return
       }
       dispatch(signOutSuccess(data))
-      navigate('/sign-in')
+      navigate('/')
     } catch (error) {
       dispatch(signOutFailure(error.message))
     }
@@ -192,7 +192,7 @@ export default function Profile() {
       </div>
       <p className='text-red-700 mt-5'>{error ? error : ''}</p>
       <p className='text-green-800 my-5 flex flex-col justify-center text-center'>{updateSuccess ? 'User updated successfully!' : ''}</p>
-      <button onClick={handleShowDog} className="w-full rounded-lg p-2 hover:opacity-95 font-semibold text-slate-500 bg-slate-300"><span className='inline-flex '><FaRegArrowAltCircleDown /></span> Show dogs</button>
+        <button onClick={handleShowDog} className="w-full rounded-lg p-2 hover:text-slate-700 font-semibold text-slate-500 bg-slate-300"><span className='inline-flex '><FaRegArrowAltCircleDown /></span> Show dogs</button>
       <p className='text-red-500 mt-5'>{showDogsError ? 'Error showing dogs' : ''}</p>
       {
         userDogs &&

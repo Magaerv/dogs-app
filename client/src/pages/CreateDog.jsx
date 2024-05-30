@@ -113,13 +113,12 @@ export const CreateDog = () => {
     e.preventDefault()
     try {
       if (formData.image.length < 1) return setError('You must upload at least 1 image')
-
       const hw = {
         height: { metric: formData.height },
         weight: { metric: formData.weight }
       }
 
-      const dogWithTemperaments = { ...formData, ...hw, temperament: selectedTemperaments }
+      const dogWithTemperaments = { ...formData, ...hw, temperament: selectedTemperaments };
       setLoading(true)
       setError(false)
       const res = await fetch('/api/dog/create', {
@@ -139,16 +138,18 @@ export const CreateDog = () => {
       } else {
         setNewDogId(data._id)
         setUpdateSuccess(true)
+        setFormData({
+          ...formData,
+          height: formData.height,
+          weight: formData.weight
+        })
       }
       setLoading(false)
-      setFormData(dogWithTemperaments)
     } catch (error) {
       setError(error.message)
       setLoading(false)
     }
   }
-
-  console.log("formData", formData)
 
   return (
     <main className="p-3 max-w-4xl mx-auto my-auto">
@@ -158,9 +159,9 @@ export const CreateDog = () => {
           <label htmlFor="name" className="font-semibold text-slate-600">Name: <span className='font-normal text-slate-500'></span></label>
           <input type="text" placeholder="e.g.: American Dogui" className="border p-3 mb-4 rounded-lg" name='name' minLength='3' required onChange={handleChange} value={formData.name} />
           <label htmlFor="height" className="font-semibold text-slate-600">Height (cm): <span className='font-normal text-slate-500'>Enter average height or range (min-max)</span></label>
-          <input type="text" placeholder="e.g.: 90 - 150 cm" className="border p-3 mb-4 rounded-lg" name='height' onChange={handleChange} value={formData.height.metric} />
+          <input type="text" placeholder="e.g.: 90 - 150 cm" className="border p-3 mb-4 rounded-lg" name='height' onChange={handleChange} value={formData?.height}/>
           <label htmlFor="weight" className="font-semibold text-slate-600">Weight (kg): <span className='font-normal text-slate-500'>Enter average weight or range (min-max)</span></label>
-          <input type="text" placeholder="e.g.: 5 - 9 kg" className="border p-3 mb-4 rounded-lg" name='weight' onChange={handleChange} value={formData.weight.metric} />
+          <input type="text" placeholder="e.g.: 5 - 9 kg" className="border p-3 mb-4 rounded-lg" name='weight' onChange={handleChange} value={formData?.weight} />
           <label htmlFor="bred_for" className="font-semibold text-slate-600">Bred for: <span className='font-normal text-slate-500'></span></label>
           <input type="text" placeholder="e.g.: Family companion dog" className="border p-3 mb-4 rounded-lg" name='bred_for' onChange={handleChange} value={formData.bred_for} />
           <label htmlFor="breed_group" className="font-semibold text-slate-600">Breed group: <span className='font-normal text-slate-500'></span></label>

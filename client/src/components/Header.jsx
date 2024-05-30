@@ -6,15 +6,15 @@ import { Link, useNavigate } from 'react-router-dom'
 export default function Header() {
 
   const { currentUser } = useSelector(state => state.user)
+  console.log(currentUser)
   const [searchTerm, setSearchTerm] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [dogs, setDogs] = useState([])
+
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const urlParams = new URLSearchParams(window.location.search)
-    urlParams.set('searchTerm', searchTerm)
+    urlParams.set('searchTerm', searchTerm.trim())
     const searchQuery = urlParams.toString()
     navigate(`/search?${searchQuery}`)
   }
@@ -23,20 +23,9 @@ export default function Header() {
     const urlParams = new URLSearchParams(location.search)
     const searchTermUrl = urlParams.get('searchTerm')
     if (searchTermUrl) {
-      setSearchTerm(searchTermUrl)
+      setSearchTerm(searchTermUrl.trim())
     }
 
-    const fetchData = async () => {
-      setLoading(true)
-      const searchQuery = urlParams.toString()
-      const res = await fetch(`/api/dog/get?${searchQuery}`)
-      const data = await res.json()
-      setDogs(data)
-      setLoading(false)
-      console.log(data)
-    }
-
-    fetchData()
   }, [location.search])
 
   return (
@@ -69,6 +58,9 @@ export default function Header() {
             ) : <li className='sm:inline text-slate-500 hover:text-slate-600'>Sign In</li>
             }
           </Link>
+          {currentUser && <Link to='/profile'>
+            <li className='hidden sm:inline text-slate-500 hover:text-slate-600'>Hola, <span className='font-semibold'>{currentUser?.username.split(' ')[0]}</span>!</li>
+          </Link>}
         </ul>
       </div>
     </header>

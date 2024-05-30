@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
+import { FaRegArrowAltCircleDown } from "react-icons/fa"
 import { useNavigate } from 'react-router-dom'
-
+import { DogCard } from "../components/DogCard"
 
 export const Search = () => {
 
@@ -13,7 +14,12 @@ export const Search = () => {
     sort: 'created_at',
     order: 'desc',
   })
-  console.log(sidebarData)
+
+  const [loading, setLoading] = useState(false)
+  const [dogs, setDogs] = useState([])
+  const [showMore, setShowMore] = useState(false)
+
+
 
 
   useEffect(() => {
@@ -24,8 +30,7 @@ export const Search = () => {
     const sortUrl = urlParams.get('sort')
     const orderUrl = urlParams.get('order')
 
-    console.log("searchTermUrl", searchTermUrl)
-    if (searchTermUrl || fromDbUrl || fromApiUrl || sortUrl, orderUrl) {
+    if (searchTermUrl || fromDbUrl || fromApiUrl || sortUrl || orderUrl) {
       setSidebarData({
         searchTerm: searchTermUrl || '',
         fromDb: fromDbUrl === 'true' ? true : false,
@@ -34,7 +39,23 @@ export const Search = () => {
         order: orderUrl || 'desc',
       })
     }
-  }, [location.search ])
+
+    const fetchData = async () => {
+      setLoading(true)
+      const searchQuery = urlParams.toString()
+      const res = await fetch(`/api/dog/get?${searchQuery}`)
+      const data = await res.json()
+      if (data.length > 0) {
+        setShowMore(true)
+      }else{
+        setShowMore(false)
+      }
+      setDogs(data)
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [location.search])
 
   const handleChange = (e) => {
 
@@ -43,7 +64,7 @@ export const Search = () => {
     }
 
     if (e.target.id === 'fromDb' || e.target.id === 'fromApi') {
-      setSidebarData({ ...sidebarData, [e.target.id]: e.target.checked || e.target.checked === 'true' ? true : false})
+      setSidebarData({ ...sidebarData, [e.target.id]: e.target.checked || e.target.checked === 'true' ? true : false })
     }
 
     if (e.target.id === 'sort_order') {
@@ -56,14 +77,31 @@ export const Search = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    setLoading(true)
     const urlParams = new URLSearchParams()
-    urlParams.set('searchTerm', sidebarData.searchTerm)
+    urlParams.set('searchTerm', sidebarData.searchTerm.trim())
     urlParams.set('fromDb', sidebarData.fromDb)
     urlParams.set('fromApi', sidebarData.fromApi)
     urlParams.set('sort', sidebarData.sort)
     urlParams.set('order', sidebarData.order)
     const searchQuery = urlParams.toString()
     navigate(`/search?${searchQuery}`)
+    setLoading(false)
+  }
+
+  const handleShowMore = async () => {
+    const numberOfDogs = dogs.length
+    const startIndex = numberOfDogs
+    const urlParams = new URLSearchParams(location.search)
+    urlParams.set('startIndex', startIndex)
+    const searchQuery = urlParams.toString()
+    const res = await fetch(`/api/dog/get?${searchQuery}`)
+    const data = await res.json()
+    if (data.length < 30) {
+      setShowMore(false)
+    }
+    setDogs([...dogs, ...data])
+
   }
 
   return (
@@ -78,7 +116,7 @@ export const Search = () => {
             />
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            
+
             <div className="flex gap-2 text-slate-700">
               <input type='checkbox' id='fromDb' className="w-5"
                 checked={sidebarData.fromDb}
@@ -107,8 +145,34 @@ export const Search = () => {
           <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95">Search</button>
         </form>
       </div>
-      <div className="">
-        <h1 className="text-3xl font-semibold border-b p-3 mt-7">Dog List</h1>
+      <div className="flex-1">
+        <h1 className="text-3xl font-semibold border-b p-6 mt-7">Results:</h1>
+        <div className="p-7 flex flex-wrap gap-4">
+          {
+            !loading && dogs.length === undefined &&
+            <p className="text-xl text-slate-700">
+              No dogs found!</p>
+          }
+
+          {
+            loading && (
+              <p className="text-xl text-slate-700 text-center w-full">Loading...</p>
+            )
+          }
+          {!loading && dogs.length > 0 && dogs.map((dog) => (
+            <DogCard key={dog._id || dog.id} dog={dog} />
+          ))}
+
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          {!loading && showMore &&
+            <button
+              onClick={handleShowMore}
+              className="rounded-lg p-3 mx-5 hover:text-slate-700 font-semibold text-slate-500 bg-slate-300"
+            > <span className='inline-flex '><FaRegArrowAltCircleDown /></span> Show more
+            </button>
+          }
+        </div>
       </div>
     </div>
   )
