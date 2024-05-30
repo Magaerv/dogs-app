@@ -199,7 +199,7 @@ export const UpdateDog = () => {
 
   return (
     <main className="p-3 max-w-4xl mx-auto my-auto">
-      <h1 className="text-3xl font-semibold text-center my-9">Update your Dog</h1>
+      <h1 className="text-3xl font-semibold text-center my-9">Update your dog info</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
           <label htmlFor="name" className="font-semibold text-slate-600">Name: <span className='font-normal text-slate-500'></span></label>

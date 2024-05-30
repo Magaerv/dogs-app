@@ -153,8 +153,6 @@ export default function Profile() {
     }
   }
 
-  console.log("CurrentUser", currentUser)
-
   return (
     <div className="p-3 max-w-lg mx-auto my-auto">
       <h1 className="text-3xl font-semibold text-center my-7">My Account</h1>
@@ -162,7 +160,7 @@ export default function Profile() {
         <input onChange={(e) => setFile(e.target.files[0])} type='file' ref={fileRef} hidden accept='image/*' />
         <img onClick={() => fileRef.current.click()} className='rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2 opacity-90' src={formData.avatar || currentUser?.avatar} alt='' />
         <p className='text-sm self-center'>
-         <span className='text-slate-500 font-semibold flex-col flex justify-center text-lg text-center'>{formData.username || currentUser?.username}</span>
+         <span className='text-slate-500 font-semibold flex-col flex justify-center text-2xl text-center'>{formData.username || currentUser?.username}</span>
           {fileError ? (
             <span className='text-red-500'>Error image upload (Image must be less than 2 mb)</span>
           ) : fileUploading > 0 && fileUploading < 100 ? (
@@ -173,18 +171,19 @@ export default function Profile() {
             ''
           )}
         </p>
+        <p className='text-slate-600 text-center mt-3'>- You can update your info here -</p>
         <input type="text"
-          placeholder="username" id='username' className="border p-3 rounded-lg mt-7" value={formData.username || currentUser?.username}
+          placeholder="username" id='username' className="border p-3 rounded-lg mt-5 text-slate-600" value={formData.username || currentUser?.username}
           onChange={handleChange}
           autoComplete="off" />
-        <input type="text" placeholder="email" id='email' className="border p-3 rounded-lg mt-7" value={formData.email || currentUser?.email} onChange={handleChange}
+        <input type="text" placeholder="email" id='email' className="border p-3 rounded-lg mt-7 text-slate-600" value={formData.email || currentUser?.email} onChange={handleChange}
           autoComplete="off" />
-        <input type="password" placeholder="password" id='password' className="border p-3 rounded-lg mt-7" value={formData.password || currentUser?.password}
+        <input type="password" placeholder="password" id='password' className="border p-3 rounded-lg mt-7 text-slate-600" value={formData.password || currentUser?.password}
           onChange={handleChange}
           autoComplete="off" />
         <button disabled={loading} className="bg-slate-600 text-white rounded-lg p-3 uppercase hover:opacity-90 disabled:opacity-70">{loading ? 'Loading...' : 'Update'}
         </button>
-        <Link className='bg-green-800 text-white p-3 rounded-lg uppercase text-center hover:opacity-90' to={'/create-dog'}>Create New Dog</Link>
+        <Link className='bg-green-800 text-white p-3 rounded-lg uppercase text-center hover:opacity-90' to={'/create-dog'}>Post your dog</Link>
       </form>
       <div className='flex justify-between mt-5'>
         <span className='text-red-500 cursor-pointer' onClick={handleDeleteUser}>Delete Account</span>
@@ -192,7 +191,7 @@ export default function Profile() {
       </div>
       <p className='text-red-700 mt-5'>{error ? error : ''}</p>
       <p className='text-green-800 my-5 flex flex-col justify-center text-center'>{updateSuccess ? 'User updated successfully!' : ''}</p>
-        <button onClick={handleShowDog} className="w-full rounded-lg p-2 hover:text-slate-700 font-semibold text-slate-500 bg-slate-300"><span className='inline-flex '><FaRegArrowAltCircleDown /></span> Show dogs</button>
+        <button onClick={handleShowDog} className="w-full rounded-lg p-2 hover:text-slate-700 font-semibold text-slate-500 bg-slate-300"><span className='inline-flex '><FaRegArrowAltCircleDown /></span> Show my dogs</button>
       <p className='text-red-500 mt-5'>{showDogsError ? 'Error showing dogs' : ''}</p>
       {
         userDogs &&
@@ -219,6 +218,9 @@ export default function Profile() {
             )
           })}
         </div>
+      }
+      {
+        !userDogs && userDogs.length === 0 && <p className='text-slate-600 text-center mt-3'>You haven`t posted about your pet yet</p>
       }
     </div>
   )

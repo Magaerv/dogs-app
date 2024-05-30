@@ -2,10 +2,12 @@ import { useEffect, useState } from "react"
 import { FaRegArrowAltCircleDown } from "react-icons/fa"
 import { useNavigate } from 'react-router-dom'
 import { DogCard } from "../components/DogCard"
+import { useSelector } from "react-redux"
 
 export const Search = () => {
 
   const navigate = useNavigate()
+  const {currentUser} = useSelector(state => state.user)
 
   const [sidebarData, setSidebarData] = useState({
     searchTerm: '',
@@ -140,6 +142,13 @@ export const Search = () => {
     navigate('/search')
   }
 
+  const handleCreate = () => {
+    if (currentUser?._id) {
+      navigate('/create-dog')
+     }else{
+      navigate('/sign-in')
+     }
+  }
 
   return (
     <div className="flex flex-col md:flex-row">
@@ -179,18 +188,11 @@ export const Search = () => {
               ))}
             </select>
           </div>
-          <div className="flex items-center gap-2 text-slate-700">
-            <label>Sort:</label>
-            <select onChange={handleChange} defaultValue={'created_at_desc'} id='sort_order' className="border rounded-lg p-3">
-              <option value='height_desc'>Height high to low</option>
-              <option value='height_asc'>Height low to high</option>
-              <option value='weight_desc'>Weight high to low</option>
-              <option value='weight_asc'>Weight low to high</option>
-            </select>
-          </div>
           <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95">Search</button>
           <button onClick={handleClear} className="bg-slate-400 text-white p-3 rounded-lg uppercase hover:opacity-95">Clear</button>
+          <button onClick={handleCreate} className="bg-green-800 text-white p-3 rounded-lg uppercase hover:opacity-95 my-10 flex justify-center items-center">Post your Dog</button>
         </form>
+       
       </div>
       <div className="flex-1">
         <h1 className="text-3xl font-semibold border-b p-6 mt-7">Results:</h1>
