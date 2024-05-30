@@ -122,14 +122,21 @@ export const getDog = async (req, res, next) => {
       const order = req.query.order === 'asc' ? 1 : -1
       const fromDb = req.query.fromDb === 'true'
       const fromApi = req.query.fromApi === 'true'
+      const temperament = req.query.temperament || '';
 
       let dbDogs = []
       let apiDogs = []
 
-      if (fromDb || !fromDb && !fromApi) {
-        dbDogs = await Dog.find({
-          name: { $regex: searchTerm, $options: 'i' },
-        }).lean().exec()
+      let dbFilter = { name: { $regex: searchTerm, $options: 'i' } }
+      if (temperament && temperament !== 'All') {
+        dbFilter = {
+          ...dbFilter,
+          temperament: { $elemMatch: { $regex: new RegExp(`^${temperament}$`, 'i') } }
+        }
+      }
+
+      if (fromDb || (!fromDb && !fromApi)) {
+        dbDogs = await Dog.find(dbFilter).lean().exec()
       }
 
       if (fromApi || (!fromApi && !fromDb)) {
@@ -146,7 +153,19 @@ export const getDog = async (req, res, next) => {
         const apiDogsResponse = await response.json()
 
         apiDogs = apiDogsResponse
-          .filter(dog => dog.name.toLowerCase().includes(searchTerm.toLowerCase()))
+          .filter(dog => {
+            if (dog.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+              if (temperament && temperament !== 'All') {
+                if (dog.temperament) {
+                  const temperaments = dog.temperament.split(',').map(temp => temp.trim())
+                  return temperaments.some(t => new RegExp(`^${temperament}$`, 'i').test(t))
+                }
+                return false
+              }
+              return true
+            }
+            return false
+          })
           .map(dog => ({ ...dog, fromDb: false }))
       }
 
@@ -159,13 +178,21 @@ export const getDog = async (req, res, next) => {
         combinedDogs = apiDogs
       }
 
-      combinedDogs.sort((a, b) => {
+      const uniqueDogs = combinedDogs.reduce((acc, dog) => {
+        const id = dog._id || dog.id
+        if (!acc.some(existingDog => existingDog._id === id || existingDog.id === id)) {
+          acc.push(dog)
+        }
+        return acc
+      }, []);
+
+      uniqueDogs.sort((a, b) => {
         if (a[sort] < b[sort]) return order === 1 ? -1 : 1
         if (a[sort] > b[sort]) return order === 1 ? 1 : -1
         return 0
       })
 
-      const paginatedDogs = combinedDogs.slice(startIndex, startIndex + limit)
+      const paginatedDogs = uniqueDogs.slice(startIndex, startIndex + limit)
 
       if (!paginatedDogs.length) {
         return next(new Error('Dogs not found'))

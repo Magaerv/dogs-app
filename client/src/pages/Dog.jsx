@@ -77,11 +77,11 @@ export const Dog = () => {
               {dog?.fromDb ?
                 dog.image.map((url) => (
                   <SwiperSlide key={url}>
-                    <div className="h-[500px]" style={{ background: `url("${url}") no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
+                    <div className="h-[500px]" style={{ background: `url("${url}") center no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
                     </div>
                   </SwiperSlide>
                 )) : <SwiperSlide>
-                  <div className="h-[500px]" style={{ background: `url("${dog.image.url}") no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
+                  <div className="h-[500px]" style={{ background: `url("${dog.image.url}") center no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
                   </div>
                 </SwiperSlide>
               }
@@ -101,7 +101,7 @@ export const Dog = () => {
                 Link copied!
               </p>
             )}
-            <div className="min-h-screen flex items-center justify-center mt-[-50px]">
+            <div className="min-h-screen flex items-center justify-center mt-7">
               <div className="bg-slate-300 w-full max-w-2xl p-3 mt-7">
                 <div className="flex justify-between items-center mb-6">
                   <p className="text-3xl text-slate-800 font-semibold uppercase">

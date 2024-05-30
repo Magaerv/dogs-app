@@ -13,9 +13,9 @@ export const DogCard = ({ dog }) => {
         <div className="flex justify-between items-center p-3">
           <p className="text-lg uppercase font-bold truncate">{dog.name}</p>
           <p>{userId && userId === dog.userRef && (
-            <Link to={`/update-dog/${dog._id}`} className="text-sm bg-green-700 text-white text-center px-2 py-1 gap-3 rounded-md uppercase">
+            <button to={`/update-dog/${dog._id}`} className="text-sm bg-green-700 text-white text-center px-2 py-1 gap-3 rounded-md uppercase">
               Update
-            </Link>
+            </button>
           )}</p>
         </div>
         <div className="flex justify-between items-center px-3 mb-1">

@@ -13,14 +13,24 @@ export const Search = () => {
     fromApi: false,
     sort: 'created_at',
     order: 'desc',
+    temperament: ''
   })
+
 
   const [loading, setLoading] = useState(false)
   const [dogs, setDogs] = useState([])
   const [showMore, setShowMore] = useState(false)
+  const [temperaments, setTemperaments] = useState([])
 
 
-
+  useEffect(() => {
+    const getTemperaments = async () => {
+      const tempData = await fetch('/api/temperament/all')
+      const data = await tempData.json()
+      setTemperaments(data)
+    }
+    getTemperaments()
+  }, [])
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search)
@@ -29,14 +39,17 @@ export const Search = () => {
     const fromApiUrl = urlParams.get('fromApi')
     const sortUrl = urlParams.get('sort')
     const orderUrl = urlParams.get('order')
+    const temperamentUrl = urlParams.get('temperament')
 
-    if (searchTermUrl || fromDbUrl || fromApiUrl || sortUrl || orderUrl) {
+
+    if (searchTermUrl || fromDbUrl || fromApiUrl || sortUrl || orderUrl || temperamentUrl) {
       setSidebarData({
         searchTerm: searchTermUrl || '',
         fromDb: fromDbUrl === 'true' ? true : false,
         fromApi: fromApiUrl === 'true' ? true : false,
         sort: sortUrl || 'created_at',
         order: orderUrl || 'desc',
+        temperament: temperamentUrl || ''
       })
     }
 
@@ -45,35 +58,45 @@ export const Search = () => {
       const searchQuery = urlParams.toString()
       const res = await fetch(`/api/dog/get?${searchQuery}`)
       const data = await res.json()
+
       if (data.length > 0) {
         setShowMore(true)
-      }else{
+      } else {
         setShowMore(false)
       }
-      setDogs(data)
-      setLoading(false)
-    }
 
+      setLoading(false)
+      setDogs(data)
+    }
     fetchData()
   }, [location.search])
 
   const handleChange = (e) => {
+    const { id, value, checked } = e.target
 
-    if (e.target.id === 'searchTerm') {
-      setSidebarData({ ...sidebarData, searchTerm: e.target.value })
+    if (id === 'searchTerm') {
+      setSidebarData({ ...sidebarData, searchTerm: value })
     }
 
-    if (e.target.id === 'fromDb' || e.target.id === 'fromApi') {
-      setSidebarData({ ...sidebarData, [e.target.id]: e.target.checked || e.target.checked === 'true' ? true : false })
+    if (id === 'temperament') {
+      setSidebarData({ ...sidebarData, temperament: value })
     }
 
-    if (e.target.id === 'sort_order') {
-      const sort = e.target.value.split('_')[0] || 'created_at'
-      const order = e.target.value.split('_')[1] || 'desc'
+    if (id === 'fromDb' || id === 'fromApi') {
+      setSidebarData({ ...sidebarData, [id]: checked })
+    }
 
-      setSidebarData({ ...sidebarData, sort, order })
+    if (id === 'sort_order') {
+      const [sort, order] = value.split('_')
+      setSidebarData({ ...sidebarData, sort: sort || 'created_at', order: order || 'desc' })
     }
   }
+
+
+  const handleTemperamentChange = (e) => {
+    setSidebarData({ ...sidebarData, temperament: e.target.value })
+  }
+
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -84,6 +107,7 @@ export const Search = () => {
     urlParams.set('fromApi', sidebarData.fromApi)
     urlParams.set('sort', sidebarData.sort)
     urlParams.set('order', sidebarData.order)
+    urlParams.set('temperament', sidebarData.temperament)
     const searchQuery = urlParams.toString()
     navigate(`/search?${searchQuery}`)
     setLoading(false)
@@ -101,8 +125,21 @@ export const Search = () => {
       setShowMore(false)
     }
     setDogs([...dogs, ...data])
-
   }
+
+
+  const handleClear = () => {
+    setSidebarData({
+      searchTerm: '',
+      fromDb: false,
+      fromApi: false,
+      sort: 'created_at',
+      order: 'desc',
+      temperament: ''
+    })
+    navigate('/search')
+  }
+
 
   return (
     <div className="flex flex-col md:flex-row">
@@ -134,6 +171,15 @@ export const Search = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 text-slate-700">
+            <label>Temperament:</label>
+            <select onChange={handleTemperamentChange} id='temperament' className="border rounded-lg p-3" value={sidebarData.temperament}>
+              <option value={'All'}>All</option>
+              {temperaments.map(temp => (
+                <option key={temp._id} value={temp.name}>{temp.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2 text-slate-700">
             <label>Sort:</label>
             <select onChange={handleChange} defaultValue={'created_at_desc'} id='sort_order' className="border rounded-lg p-3">
               <option value='height_desc'>Height high to low</option>
@@ -143,6 +189,7 @@ export const Search = () => {
             </select>
           </div>
           <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95">Search</button>
+          <button onClick={handleClear} className="bg-slate-400 text-white p-3 rounded-lg uppercase hover:opacity-95">Clear</button>
         </form>
       </div>
       <div className="flex-1">

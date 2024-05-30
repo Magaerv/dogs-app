@@ -6,7 +6,6 @@ import { Link, useNavigate } from 'react-router-dom'
 export default function Header() {
 
   const { currentUser } = useSelector(state => state.user)
-  console.log(currentUser)
   const [searchTerm, setSearchTerm] = useState('')
 
   const navigate = useNavigate()
