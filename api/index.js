@@ -6,6 +6,7 @@ import authRouter from './routes/auth.route.js'
 import dogRouter from './routes/dog.route.js'
 import cookieParser from 'cookie-parser'
 import temperamentRouter from './routes/temperament.route.js'
+import path from 'path'
 
 dotenv.config()
 
@@ -18,6 +19,7 @@ mongoose
     console.log(err)
   })
 
+const __dirname = path.resolve()
 
 const app = express()
 
@@ -34,6 +36,12 @@ app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/dog', dogRouter)
 app.use('/api/temperament', temperamentRouter)
+
+app.use(express.static(path.join(__dirname, '/client/dist')))
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
+})
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500
