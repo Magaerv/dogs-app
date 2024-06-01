@@ -1,4 +1,4 @@
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage'
+import { getDownloadURL, getStorage, ref, uploadBytesResumable, deleteObject } from 'firebase/storage'
 import { useEffect, useState } from "react"
 import { useSelector } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
@@ -17,8 +17,10 @@ export const UpdateDog = () => {
   const [formData, setFormData] = useState({
     name: '',
     image: [],
-    height: '',
-    weight: '',
+    heightMin: '',
+    heightMax: '',
+    weightMin: '',
+    weightMax: '',
     bred_for: '',
     breed_group: '',
     life_span: '',
@@ -44,12 +46,16 @@ export const UpdateDog = () => {
           setLoading(false)
           return
         } else {
-     //     setDog(data)
+          const [heightMin, heightMax] = data.height.metric.split(' - ').map(h => h.replace(' cm', ''))
+          const [weightMin, weightMax] = data.weight.metric.split(' - ').map(w => w.replace(' kg', ''))
+
           setFormData({
             name: data.name,
             image: data.image,
-            height: data.height.metric,
-            weight: data.weight.metric,
+            heightMin,
+            heightMax,
+            weightMin,
+            weightMax,
             bred_for: data.bred_for,
             breed_group: data.breed_group,
             life_span: data.life_span,
@@ -131,6 +137,22 @@ export const UpdateDog = () => {
     })
   }
 
+  const deleteImage = async (url) => {
+    const storage = getStorage(app)
+    const imageRef = ref(storage, decodeURIComponent(url).split('/o/')[1].split('?')[0])
+
+    try {
+      await deleteObject(imageRef)
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        image: prevFormData.image.filter((imageUrl) => imageUrl !== url)
+      }))
+    } catch (error) {
+      setImageError("Failed to delete image")
+      console.error(error)
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData({
@@ -156,9 +178,12 @@ export const UpdateDog = () => {
       if (formData.image.length < 1) return setError('You must upload at least 1 image')
       setUpdateSuccess(false)
       
+      const formattedHeight = `${formData.heightMin} - ${formData.heightMax}`
+      const formattedWeight = `${formData.weightMin} - ${formData.weightMax}`
+      
       const hw = {
-        height: { metric: formData.height },
-        weight: { metric: formData.weight }
+        height: { metric: formattedHeight },
+        weight: { metric: formattedWeight }
       };
       
       const dogData = {
@@ -185,7 +210,6 @@ export const UpdateDog = () => {
         setError(data.message)
       }
       else {
-      //  setDog(data);
         setUpdateSuccess(true)
       }
       setUpdateSuccess(true)
@@ -204,10 +228,14 @@ export const UpdateDog = () => {
         <div className="flex flex-col gap-2">
           <label htmlFor="name" className="font-semibold text-slate-600">Name: <span className='font-normal text-slate-500'></span></label>
           <input type="text" placeholder="e.g.: American Dogui" className="border p-3 mb-4 rounded-lg" name='name' minLength='3' required onChange={handleChange} value={formData?.name} />
-          <label htmlFor="height" className="font-semibold text-slate-600">Height (cm): <span className='font-normal text-slate-500'>Enter average height or range (min-max)</span></label>
-          <input type="text" placeholder="e.g.: 90 - 150 cm" className="border p-3 mb-4 rounded-lg" name='height' onChange={handleChange} value={formData?.height} />
-          <label htmlFor="weight" className="font-semibold text-slate-600">Weight (kg): <span className='font-normal text-slate-500'>Enter average weight or range (min-max)</span></label>
-          <input type="text" placeholder="e.g.: 5 - 9 kg" className="border p-3 mb-4 rounded-lg" name='weight' onChange={handleChange} value={formData?.weight} />
+          <label htmlFor="heightMin" className="font-semibold text-slate-600">Min Height (cm):</label>
+          <input type="number" placeholder="e.g.: 50" className="border p-3 mb-4 rounded-lg" name='heightMin' onChange={handleChange} value={formData?.heightMin} />
+          <label htmlFor="heightMax" className="font-semibold text-slate-600">Max Height (cm):</label>
+          <input type="number" placeholder="e.g.: 100" className="border p-3 mb-4 rounded-lg" name='heightMax' onChange={handleChange} value={formData?.heightMax} />
+          <label htmlFor="weightMin" className="font-semibold text-slate-600">Min Weight (kg):</label>
+          <input type="number" placeholder="e.g.: 5" className="border p-3 mb-4 rounded-lg" name='weightMin' onChange={handleChange} value={formData?.weightMin} />
+          <label htmlFor="weightMax" className="font-semibold text-slate-600">Max Weight (kg):</label>
+          <input type="number" placeholder="e.g.: 20" className="border p-3 mb-4 rounded-lg" name='weightMax' onChange={handleChange} value={formData?.weightMax} />
           <label htmlFor="bred_for" className="font-semibold text-slate-600">Bred for: <span className='font-normal text-slate-500'></span></label>
           <input type="text" placeholder="e.g.: Family companion dog" className="border p-3 mb-4 rounded-lg" name='bred_for' onChange={handleChange} value={formData?.bred_for} />
           <label htmlFor="breed_group" className="font-semibold text-slate-600">Breed group: <span className='font-normal text-slate-500'></span></label>
@@ -253,7 +281,7 @@ export const UpdateDog = () => {
                 return (
                   <div key={url} className="flex justify-between p-1 border items-center">
                     <img src={url} alt="dog image" className="w-20 h-20 object-cover rounded-lg" />
-                    <button className="text-red-500 p-1 rounded-lg uppercase hover:opacity-80">Delete</button>
+                    <button onClick={()=> {deleteImage(url)}} className="text-red-500 p-1 rounded-lg uppercase hover:opacity-80">Delete</button>
                   </div>
                 )
               })

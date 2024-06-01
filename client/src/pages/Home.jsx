@@ -19,7 +19,7 @@ export default function Home() {
   useEffect(() => {
     const fetchLastDogs = async () => {
       try {
-        const res = await fetch('/api/dog/get?fromDb=true&limit=6')
+        const res = await fetch('/api/dog/get?fromDb=true&limit=2')
         const data = await res.json()
         setLastDogs(data)
         fetchPowerfulTemp()
@@ -56,7 +56,7 @@ export default function Home() {
         <h1 className='text-slate-700 font-bold text-3xl lg:text-6xl p-3'>The DOGSLOVERS<span className='text-slate-500'>App</span>
         </h1>
         <div className="text-slate-600 text-sm sm:text-lg p-3 space-y-3">
-          <p>Welcome to our <span className='text-slate-700 font-semibold'>Dog Lovers App</span>, the ultimate platform for sharing and discovering everything about dogs! Our application utilizes the powerful TheDogAPI.com to provide you with a vast database of dog breeds, complete with photos and detailed information.</p>
+          <p>Welcome to our <span className='text-slate-700 font-semibold'>Dog Lovers App</span>, the ultimate platform for sharing and discovering everything about dogs! Our application utilizes the powerful <Link to=' ' className='italic'>www.thedogAPI.com</Link> to provide you with a vast database of dog breeds, complete with photos and detailed information.</p>
           <p>But that´s not all! You can also contribute to our community by uploading information about your own pet dogs. Share photos, add descriptions, and showcase your furry friends to dog lovers everywhere. Additionally, you have full control over your posts, allowing you to edit and delete the information as needed. </p>
           <p>Join our vibrant community where every dog has a story to tell, and every user can discover new canine friends. Whether you´re looking to learn more about different breeds or eager to share your own pet´s unique charm, our app is the perfect place for all dog enthusiasts.</p>
         </div>
@@ -75,12 +75,11 @@ export default function Home() {
         {
           lastDogs && lastDogs.length > 0 && (
             <div className=''>
-              <div className=''>
-                <h2 className='text-2xl font-semibold text-slate-500 p-3'>
+              <div className='p-3 text-slate-500'>
+                <h2 className='text-2xl font-semibold text-slate-500'>
                   Recent Dogs:
                 </h2>
-                { /* <Link to={'/search?searchTerm=loving'}>Show more</Link> */
-                }
+                <Link className='underline' to={'/search'}>Show more</Link>
               </div>
               <div className='flex flex-wrap gap-5 p-3'>
                 {lastDogs.map((dog) => (
@@ -93,12 +92,11 @@ export default function Home() {
         {
           dogTemp1 && dogTemp1.length > 0 && (
             <div className=''>
-              <div className=''>
-                <h2 className='text-2xl font-semibold text-slate-500 p-3'>
-                  Powerful Dogs:
+              <div className='p-3 text-slate-500'>
+                <h2 className='text-2xl font-semibold'>
+                  Discover Our Powerful Dogs:
                 </h2>
-                { /* <Link to={'/search?searchTerm=loving'}>Show more</Link> */
-                }
+                <Link className='underline' to={'/search?temperament=powerful'}>Show more</Link>
               </div>
               <div className='flex flex-wrap gap-5 p-3'>
                 {dogTemp1.map((dog) => (
@@ -111,12 +109,11 @@ export default function Home() {
         {
           dogTemp2 && dogTemp2.length > 0 && (
             <div className=''>
-              <div className=''>
-                <h2 className='text-2xl font-semibold text-slate-500 p-3'>
-                  Quiet Dogs:
+              <div className='p-3 text-slate-500'>
+                <h2 className='text-2xl font-semibold'>
+                  Explore Our Quiet Dogs:
                 </h2>
-                { /* <Link to={'/search?searchTerm=loving'}>Show more</Link> */
-                }
+                <Link className='underline' to={'/search?temperament=quiet'}>Show more</Link>
               </div>
               <div className='flex flex-wrap gap-5 p-3'>
                 {dogTemp2.map((dog) => (

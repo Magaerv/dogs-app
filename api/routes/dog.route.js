@@ -7,8 +7,9 @@ const dogRouter = express.Router()
 dogRouter.post('/create', verifyToken, createDog)
 dogRouter.delete('/delete/:id', verifyToken, deleteDog)
 dogRouter.put('/update/:id', verifyToken, updateDog)
-dogRouter.get('/get/:id', getDog)
 dogRouter.get('/get', getDogs)
+dogRouter.get('/get/:id', getDog)
+
 
 
 export default dogRouter

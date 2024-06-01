@@ -79,6 +79,7 @@ export const getDog = async (req, res, next) => {
     const id = req.params.id
     
     const isDatabaseId = mongoose.Types.ObjectId.isValid(id)
+   
 
     if (!isDatabaseId) {
       const response = await fetch(`${process.env.API_URL}`, {
@@ -118,8 +119,11 @@ export const getDog = async (req, res, next) => {
       const limit = parseInt(req.query.limit) || 30
       const startIndex = parseInt(req.query.startIndex) || 0
       const searchTerm = req.query.searchTerm || ''
-      const sort = req.query.sort || 'createdAt'
-      const order = req.query.order === 'asc' ? 1 : -1
+      const sortOrder = req.query.sort_order || 'name_asc'
+      
+      const [sort, order] = sortOrder.split('_')
+      const orderValue = order === 'asc' ? 1 : -1;
+
       const fromDb = req.query.fromDb === 'true'
       const fromApi = req.query.fromApi === 'true'
       const temperament = req.query.temperament || '';
@@ -187,10 +191,12 @@ export const getDog = async (req, res, next) => {
       }, []);
 
       uniqueDogs.sort((a, b) => {
-        if (a[sort] < b[sort]) return order === 1 ? -1 : 1
-        if (a[sort] > b[sort]) return order === 1 ? 1 : -1
+        const valueA = a[sort].toLowerCase()
+        const valueB = b[sort].toLowerCase()
+        if (valueA < valueB) return orderValue === 1 ? -1 : 1
+        if (valueA > valueB) return orderValue === 1 ? 1 : -1
         return 0
-      })
+      });
 
       const paginatedDogs = uniqueDogs.slice(startIndex, startIndex + limit)
 

@@ -7,7 +7,7 @@ export const DogCard = ({ dog }) => {
   const userId = useSelector(state => state.user.currentUser?._id)
 
   return (
-    <div className='bg-white shadow-md hover:shadow-lg transition-shadow  overflow-hidden rounded-lg text-slate-700 w-full sm:w-[330px]'>
+    <div className='bg-white shadow-md hover:shadow-lg transition-shadow  overflow-hidden rounded-lg text-slate-700 w-full sm:w-[310px]'>
       <Link to={`/dog/${dog._id || dog.id}`}>
         <img src={dog.image[0] || dog.image.url} alt='dog cover' className='h-[320px] sm:h-[220px] w-full object-cover hover:scale-105 transition-scale duration-300 center no-repeat' />
         <div className="flex justify-between items-center p-3">

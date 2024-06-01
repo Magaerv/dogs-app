@@ -8,14 +8,16 @@ import SignUp from './pages/SignUp'
 import { CreateDog } from './pages/CreateDog'
 import { UpdateDog } from './pages/UpdateDog'
 import { Dog } from './pages/Dog'
-import {ContactOwner} from './pages/ContactOwner'
 import { Search } from './pages/Search'
+import Footer from './components/Footer'
+import { Magaerv } from './pages/Magaerv'
 
 
 export default function App() {
   return <BrowserRouter>
     <Header />
     <Routes>
+      <Route path='/magaerv' element={<Magaerv />} />
       <Route path='/' element={<Home />} />
       <Route path='/sign-in' element={<SignIn />} />
       <Route path='/sign-up' element={<SignUp />} />
@@ -25,8 +27,8 @@ export default function App() {
         <Route path='/profile' element={<Profile />} />
         <Route path='/create-dog' element={<CreateDog />} />
         <Route path='/update-dog/:dogId' element={<UpdateDog />} />
-        <Route path='/contact' element={<ContactOwner />} />
       </Route>
     </Routes>
+    <Footer/>
   </BrowserRouter>
 }

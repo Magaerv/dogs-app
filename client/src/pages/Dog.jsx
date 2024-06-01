@@ -7,6 +7,8 @@ import 'swiper/css/navigation'
 import { Navigation } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import {MdLocationOn} from 'react-icons/md'
+
+
 export const Dog = () => {
 
 
@@ -14,7 +16,6 @@ export const Dog = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const [copied, setCopied] = useState(false)
-
 
 
   const params = useParams()
@@ -32,7 +33,6 @@ export const Dog = () => {
           return
         }
         setDog(data)
-        console.log(data)
         setLoading(false)
         setError(false)
       } catch (error) {
@@ -48,12 +48,12 @@ export const Dog = () => {
     const prevButton = document.querySelector('.swiper-button-prev')
 
     if (nextButton) {
-      nextButton.style.color = 'rgb(209 213 219)'
+      nextButton.style.color = 'rgb(51 65 85)'
       nextButton.style.fontSize = '20px'
     }
 
     if (prevButton) {
-      prevButton.style.color = 'rgb(209 213 219)'
+      prevButton.style.color = 'rgb(51 65 85)'
       prevButton.style.fontSize = '20px'
     }
   }, [dog])
@@ -72,16 +72,52 @@ export const Dog = () => {
       {
         dog && !loading && !error && (
           <div className='my-auto'>
-            <Swiper modules={[Navigation]} navigation spaceBetween={0}
+            <div className="min-h-screen flex items-center justify-center mt-7">
+              <div className="bg-slate-300 w-full max-w-2xl p-4">
+                <div className="flex justify-between items-center mb-6 ">
+                  <p className="text-3xl text-slate-800 font-semibold uppercase p-3">
+                    <img className="rounded-full size-1/4 my-3" src={dog?.fromDb ? dog?.image[0] : dog?.image.url} alt={dog.name} />
+                    <span className='p-3'>{dog.name}</span>
+                  </p>
+                  {userId && userId === dog.userRef && (
+                    <Link to={`/update-dog/${params.id}`} className="text-sm bg-green-700 text-white text-center px-2 py-1 gap-3 rounded-md uppercase">
+                      Update
+                    </Link>
+                  )}
+                </div>
+                <div className="flex gap-2 mb-4 p-3">
+                  {
+                    dog.origin && <>
+                      <MdLocationOn className="text-green-700 text-2xl" />
+                      <span className="text-slate-800 font-semibold text-lg">{dog.origin}</span>
+                    </>
+                  }
+                </div>
+                <div className="p-1 m-3 text-slate-800 gap-4 my-4">
+                  {dog && <p className="pb-2"><span className="font-bold">Height:</span> {dog.height.metric || dog.height} cm.</p>}
+                  {dog && <p className="pb-2"><span className="font-bold">Weight:</span> {dog.weight.metric || dog.weight} kg.</p>}
+                  {dog.bred_for && <p className="pb-2"><span className="font-bold">Bred for:</span> {dog.bred_for}</p>}
+                  {dog.breed_group && <p className="pb-2"><span className="font-bold">Breed group:</span> {dog.breed_group}</p>}
+                  {dog.life_span && <p className="pb-2"><span className="font-bold">Life Span:</span> {dog.life_span}</p>}
+                  {dog.fromDb
+                    ? (<p className="pb-2"><span className="font-bold">Temperaments:</span> {dog.temperament.join(', ')}</p>)
+                    : (<p className="pb-2"><span className="font-bold">Temperaments:</span> {dog.temperament}</p>)
+                  }
+                  {dog.origin && <p className="pb-2"><span className="font-bold">Country of origin:</span> {dog.origin}</p>}
+                  {dog.description && <p className="pb-2"><span className="font-bold">Description:</span> {dog.description}</p>}
+                </div>
+              </div>
+            </div>
+            <Swiper className="mt-5" modules={[Navigation]} navigation spaceBetween={0}
               slidesPerView={1} >
               {dog?.fromDb ?
                 dog.image.map((url) => (
                   <SwiperSlide key={url}>
-                    <div className="h-[500px]" style={{ background: `url("${url}") center no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
+                    <div className="h-[900px]" style={{ background: `url("${url}") center no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
                     </div>
                   </SwiperSlide>
                 )) : <SwiperSlide>
-                  <div className="h-[500px]" style={{ background: `url("${dog.image.url}") center no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
+                  <div className="h-[900px]" style={{ background: `url("${dog.image.url}") center no-repeat`, backgroundSize: 'cover', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.2)' }}>
                   </div>
                 </SwiperSlide>
               }
@@ -97,45 +133,10 @@ export const Dog = () => {
                 }} />
             </div>
             {copied && (
-              <p className="fixed top-[23%] right-[5%] z-10 rounded-md p-2 text-slate-700 bg-slate-200">
+              <p className="fixed top-[23%] right-[5%] z-10 rounded-md p-2 text-slate-700 bg-slate-400">
                 Link copied!
               </p>
             )}
-            <div className="min-h-screen flex items-center justify-center mt-7">
-              <div className="bg-slate-300 w-full max-w-2xl p-3 mt-7">
-                <div className="flex justify-between items-center mb-6">
-                  <p className="text-3xl text-slate-800 font-semibold uppercase">
-                    {dog.name}
-                  </p>
-                  {userId && userId === dog.userRef && (
-                    <Link to={`/update-dog/${params.id}`} className="text-sm bg-green-700 text-white text-center px-2 py-1 gap-3 rounded-md uppercase">
-                      Update
-                    </Link>
-                  )}
-                </div>
-                <div className="flex gap-2 mb-4">
-                  {
-                    dog.origin && <>
-                      <MdLocationOn className="text-green-700 text-2xl" />
-                      <span className="text-slate-800 font-semibold text-lg">{dog.origin}</span>
-                    </>
-                  }
-                </div>
-                <div className="p-1 m-3 text-slate-800 gap-4">
-                  {dog && <p className="pb-2"><span className="font-bold">Height:</span> {dog.height.metric || dog.height} cm.</p>}
-                  {dog && <p className="pb-2"><span className="font-bold">Weight:</span> {dog.weight.metric || dog.weight} kg.</p>}
-                  {dog.bred_for && <p className="pb-2"><span className="font-bold">Bred for:</span> {dog.bred_for}</p>}
-                  {dog.breed_group && <p className="pb-2"><span className="font-bold">Breed group:</span> {dog.breed_group}</p>}
-                  {dog.life_span && <p className="pb-2"><span className="font-bold">Life Span:</span> {dog.life_span}</p>}
-                  {dog.fromDb
-                    ? (<p className="pb-2"><span className="font-bold">Temperaments:</span> {dog.temperament.join(', ')}</p>)
-                    : (<p className="pb-2"><span className="font-bold">Temperaments:</span> {dog.temperament}</p>)
-                  }
-                  {dog.origin && <p className="pb-2"><span className="font-bold">Country of origin:</span> {dog.origin}</p>}
-                  {dog.description && <p className="pb-2"><span className="font-bold">Description:</span> {dog.description}</p>}
-                </div>
-              </div>
-            </div>
           </div>
         )}
     </main>

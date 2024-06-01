@@ -1,4 +1,4 @@
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage'
+import { getDownloadURL, getStorage, ref, uploadBytesResumable, deleteObject } from 'firebase/storage'
 import { useEffect, useState } from "react"
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
@@ -8,22 +8,23 @@ export const CreateDog = () => {
 
   const { currentUser } = useSelector(state => state.user)
 
-
   const [files, setFiles] = useState([])
   const [temperaments, setTemperaments] = useState([])
   const [selectedTemperaments, setSelectedTemperaments] = useState([])
   const [formData, setFormData] = useState({
     name: '',
     image: [],
-    height: '',
-    weight: '',
+    heightMin: '',
+    heightMax: '',
+    weightMin: '',
+    weightMax: '',
     bred_for: '',
     breed_group: '',
     life_span: '',
     origin: '',
     description: '',
   })
-  const [newDogId, setNewDogId] = useState(null); 
+  const [newDogId, setNewDogId] = useState(null)
   const [imageError, setImageError] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState(false)
@@ -91,6 +92,23 @@ export const CreateDog = () => {
     })
   }
 
+  const deleteImage = async (url) => {
+    const storage = getStorage(app)
+    const imageRef = ref(storage, decodeURIComponent(url).split('/o/')[1].split('?')[0])
+
+    try {
+      await deleteObject(imageRef)
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        image: prevFormData.image.filter((imageUrl) => imageUrl !== url)
+      }))
+    } catch (error) {
+      setImageError("Failed to delete image")
+      console.error(error)
+    }
+  };
+
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData({
@@ -113,12 +131,16 @@ export const CreateDog = () => {
     e.preventDefault()
     try {
       if (formData.image.length < 1) return setError('You must upload at least 1 image')
+
+      const formattedHeight = `${formData.heightMin} - ${formData.heightMax}`
+      const formattedWeight = `${formData.weightMin} - ${formData.weightMax}`
+
       const hw = {
-        height: { metric: formData.height },
-        weight: { metric: formData.weight }
+        height: { metric: formattedHeight },
+        weight: { metric: formattedWeight }
       }
 
-      const dogWithTemperaments = { ...formData, ...hw, temperament: selectedTemperaments };
+      const dogWithTemperaments = { ...formData, ...hw, temperament: selectedTemperaments }
       setLoading(true)
       setError(false)
       const res = await fetch('/api/dog/create', {
@@ -128,7 +150,7 @@ export const CreateDog = () => {
         },
         body: JSON.stringify({
           ...dogWithTemperaments,
-          userRef: currentUser._id
+          userRef: currentUser?._id
         })
       })
       const data = await res.json()
@@ -158,10 +180,14 @@ export const CreateDog = () => {
         <div className="flex flex-col gap-2">
           <label htmlFor="name" className="font-semibold text-slate-600">Name: <span className='font-normal text-slate-500'></span></label>
           <input type="text" placeholder="e.g.: American Dogui" className="border p-3 mb-4 rounded-lg" name='name' minLength='3' required onChange={handleChange} value={formData.name} />
-          <label htmlFor="height" className="font-semibold text-slate-600">Height (cm): <span className='font-normal text-slate-500'>Enter average height or range (min-max)</span></label>
-          <input type="text" placeholder="e.g.: 90 - 150 cm" className="border p-3 mb-4 rounded-lg" name='height' onChange={handleChange} value={formData?.height}/>
-          <label htmlFor="weight" className="font-semibold text-slate-600">Weight (kg): <span className='font-normal text-slate-500'>Enter average weight or range (min-max)</span></label>
-          <input type="text" placeholder="e.g.: 5 - 9 kg" className="border p-3 mb-4 rounded-lg" name='weight' onChange={handleChange} value={formData?.weight} />
+          <label htmlFor="heightMin" className="font-semibold text-slate-600">Min Height (cm): <span className='font-normal text-slate-500'>Enter average height or range (min-max)</span></label>
+          <input type="number" name="heightMin" placeholder="Min Height (cm)" className="border p-3 mb-4 rounded-lg" onChange={handleChange} value={formData.heightMin} />
+          <label htmlFor="heightMax" className="font-semibold text-slate-600">Máx Height (cm): <span className='font-normal text-slate-500'>Enter average height or range (min-max)</span></label>
+          <input type="number" name="heightMax" placeholder="Máx Height (cm)" className="border p-3 mb-4 rounded-lg" onChange={handleChange} value={formData.heightMax} />
+          <label htmlFor="weightMin" className="font-semibold text-slate-600">Min Weight (kg): <span className='font-normal text-slate-500'>Enter average weight or range (min-max)</span></label>
+          <input type="number" name="weightMin" placeholder="Min Height (cm)" className="border p-3 mb-4 rounded-lg" onChange={handleChange} value={formData?.weightMin} />
+          <label htmlFor="weightMax" className="font-semibold text-slate-600">Weight (kg): <span className='font-normal text-slate-500'>Enter average weight or range (min-max)</span></label>
+          <input type="number" name="weightMax" placeholder="Max Height (cm)" className="border p-3 mb-4 rounded-lg" onChange={handleChange} value={formData?.weightMax} />
           <label htmlFor="bred_for" className="font-semibold text-slate-600">Bred for: <span className='font-normal text-slate-500'></span></label>
           <input type="text" placeholder="e.g.: Family companion dog" className="border p-3 mb-4 rounded-lg" name='bred_for' onChange={handleChange} value={formData.bred_for} />
           <label htmlFor="breed_group" className="font-semibold text-slate-600">Breed group: <span className='font-normal text-slate-500'></span></label>
@@ -197,7 +223,7 @@ export const CreateDog = () => {
                 return (
                   <div key={url} className="flex justify-between p-1 border items-center">
                     <img src={url} alt="dog image" className="w-20 h-20 object-cover rounded-lg" />
-                    <button className="text-red-500 p-1 rounded-lg uppercase hover:opacity-80">Delete</button>
+                    <button onClick={()=> {deleteImage(url)}} className="text-red-500 p-1 rounded-lg uppercase hover:opacity-80">Delete</button>
                   </div>
                 )
               })
@@ -216,7 +242,7 @@ export const CreateDog = () => {
         <ul className='col-span-2 flex justify-center gap-4'>
           <li className='bg-slate-500 text-white rounded-lg p-2 hover:opacity-95'><Link to={'/profile'}>Go to Profile</Link></li>
           {updateSuccess
-            ? <li className='bg-slate-500 text-white rounded-lg p-2 hover:opacity-95'><Link to={`/dog/${newDogId}` }>View Details</Link></li> : ''}
+            ? <li className='bg-slate-500 text-white rounded-lg p-2 hover:opacity-95'><Link to={`/dog/${newDogId}`}>View Details</Link></li> : ''}
         </ul>
       </form>
     </main>

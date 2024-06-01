@@ -10,7 +10,10 @@ export const signup = async (req, res, next) => {
 
   try {
    const savedUser =  await newUser.save()
-    res.status(201).json(savedUser)
+
+    const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET)
+    const { password: pass, ...rest } = savedUser._doc
+    res.cookie('access_token', token, { httpOnly: true }).status(201).json(rest);
   } catch (error) {
     next(error)
   }
@@ -26,10 +29,8 @@ export const signin = async (req, res, next) => {
     if (!validPass) return next(errorHandler(401, 'Wrong credentials'))
     
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET)
-    const { password: pass, username: name, ...rest } = validUser._doc
-    res.cookie('access_token', token, { httpOnly: true }).status(200).json(
-      rest
-    )
+    const { password: pass, ...rest } = validUser._doc
+    res.cookie('access_token', token, { httpOnly: true }).status(200).json(rest)
   } catch (error) {
     next(error)
   }

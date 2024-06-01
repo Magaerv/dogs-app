@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { app } from "../firebase"
 import { deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutFailure, signOutStart, signOutSuccess, updateUserFailure, updateUserStart, updateUserSuccess } from '../redux/user/userSlice'
 import { FaRegArrowAltCircleDown } from "react-icons/fa";
+import { MdAddAPhoto } from "react-icons/md";
 
 
 export default function Profile() {
@@ -158,8 +159,13 @@ export default function Profile() {
       <h1 className="text-3xl font-semibold text-center my-7">My Account</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input onChange={(e) => setFile(e.target.files[0])} type='file' ref={fileRef} hidden accept='image/*' />
-        <img onClick={() => fileRef.current.click()} className='rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2 opacity-90' src={formData.avatar || currentUser?.avatar} alt='' />
-        <p className='text-sm self-center'>
+        <div className="relative self-center mt-2 cursor-pointer" onClick={() => fileRef.current.click()}>
+          <img className='rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2 opacity-90' src={formData.avatar || currentUser?.avatar} alt='' />
+          <span className='absolute bottom-0 right-0 text-2xl text-slate-200 bg-slate-400 rounded-full p-1 text-lg'>
+            <MdAddAPhoto />
+          </span>
+        </div>
+          <p className='text-sm self-center'>
          <span className='text-slate-500 font-semibold flex-col flex justify-center text-2xl text-center'>{formData.username || currentUser?.username}</span>
           {fileError ? (
             <span className='text-red-500'>Error image upload (Image must be less than 2 mb)</span>
@@ -186,8 +192,8 @@ export default function Profile() {
         <Link className='bg-green-800 text-white p-3 rounded-lg uppercase text-center hover:opacity-90' to={'/create-dog'}>Post your dog</Link>
       </form>
       <div className='flex justify-between mt-5'>
-        <span className='text-red-500 cursor-pointer' onClick={handleDeleteUser}>Delete Account</span>
-        <span className='text-red-500 cursor-pointer' onClick={handleLogout}>Sign Out</span>
+        <span className='text-red-500 cursor-pointer hover:underline' onClick={handleDeleteUser}>Delete Account</span>
+        <span className='text-red-500 cursor-pointer hover:underline' onClick={handleLogout}>Sign Out</span>
       </div>
       <p className='text-red-700 mt-5'>{error ? error : ''}</p>
       <p className='text-green-800 my-5 flex flex-col justify-center text-center'>{updateSuccess ? 'User updated successfully!' : ''}</p>

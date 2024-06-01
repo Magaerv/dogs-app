@@ -24,7 +24,6 @@ export default function Header() {
     if (searchTermUrl) {
       setSearchTerm(searchTermUrl.trim())
     }
-
   }, [location.search])
 
   return (
@@ -48,17 +47,14 @@ export default function Header() {
           <Link to='/'>
             <li className='hidden sm:inline text-slate-500 hover:text-slate-600'>Home</li>
           </Link>
-          <Link to='/contact'>
-            <li className='hidden sm:inline text-slate-500 hover:text-slate-600'>Contact</li>
-          </Link>
           <Link to={currentUser ? '/profile' : '/sign-in'}>
             {currentUser ? (
               <img className='rounded-full h-7 w-7 object-cover opacity-90' src={currentUser?.avatar || currentUser?.avatar} alt='avatar' />
             ) : <li className='sm:inline text-slate-500 hover:text-slate-600'>Sign In</li>
             }
           </Link>
-          {currentUser && <Link to='/profile'>
-            <li className='hidden sm:inline text-slate-500 hover:text-slate-600'>Hola, <span className='font-semibold'>{currentUser?.username.split(' ')[0]}</span>!</li>
+          {currentUser && currentUser.username && <Link to='/profile'>
+            <li className='hidden sm:inline text-slate-500 hover:text-slate-600'>Hola, <span className='font-semibold'>{currentUser?.username.split(' ')[0] || currentUser?.username }</span>!</li>
           </Link>}
         </ul>
       </div>

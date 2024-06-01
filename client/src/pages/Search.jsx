@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react"
 import { FaRegArrowAltCircleDown } from "react-icons/fa"
-import { useNavigate } from 'react-router-dom'
-import { DogCard } from "../components/DogCard"
 import { useSelector } from "react-redux"
+import { useNavigate, useLocation } from 'react-router-dom'
+import { DogCard } from "../components/DogCard"
 
 export const Search = () => {
 
   const navigate = useNavigate()
+  const location = useLocation();
+
   const {currentUser} = useSelector(state => state.user)
 
   const [sidebarData, setSidebarData] = useState({
     searchTerm: '',
     fromDb: false,
     fromApi: false,
-    sort: 'created_at',
-    order: 'desc',
+    sort_order: 'name_asc',
     temperament: ''
   })
 
@@ -39,18 +40,16 @@ export const Search = () => {
     const searchTermUrl = urlParams.get('searchTerm')
     const fromDbUrl = urlParams.get('fromDb')
     const fromApiUrl = urlParams.get('fromApi')
-    const sortUrl = urlParams.get('sort')
-    const orderUrl = urlParams.get('order')
+    const sort_orderUrl = urlParams.get('sort_order')
     const temperamentUrl = urlParams.get('temperament')
 
 
-    if (searchTermUrl || fromDbUrl || fromApiUrl || sortUrl || orderUrl || temperamentUrl) {
+    if (searchTermUrl || fromDbUrl || fromApiUrl || sort_orderUrl || temperamentUrl) {
       setSidebarData({
         searchTerm: searchTermUrl || '',
         fromDb: fromDbUrl === 'true' ? true : false,
         fromApi: fromApiUrl === 'true' ? true : false,
-        sort: sortUrl || 'created_at',
-        order: orderUrl || 'desc',
+        sort_order: sort_orderUrl || 'name_asc',
         temperament: temperamentUrl || ''
       })
     }
@@ -62,7 +61,7 @@ export const Search = () => {
       const data = await res.json()
 
       if (data.length > 0) {
-        setShowMore(true)
+         setShowMore(data.length === 30)
       } else {
         setShowMore(false)
       }
@@ -76,28 +75,17 @@ export const Search = () => {
   const handleChange = (e) => {
     const { id, value, checked } = e.target
 
+
     if (id === 'searchTerm') {
       setSidebarData({ ...sidebarData, searchTerm: value })
-    }
-
-    if (id === 'temperament') {
+    } else if (id === 'temperament') {
       setSidebarData({ ...sidebarData, temperament: value })
-    }
-
-    if (id === 'fromDb' || id === 'fromApi') {
+    } else if (id === 'fromDb' || id === 'fromApi') {
       setSidebarData({ ...sidebarData, [id]: checked })
+    } else if (id === 'sort_order') {
+      setSidebarData({ ...sidebarData, sort_order: value })
     }
-
-    if (id === 'sort_order') {
-      const [sort, order] = value.split('_')
-      setSidebarData({ ...sidebarData, sort: sort || 'created_at', order: order || 'desc' })
-    }
-  }
-
-
-  const handleTemperamentChange = (e) => {
-    setSidebarData({ ...sidebarData, temperament: e.target.value })
-  }
+  };
 
 
   const handleSubmit = (e) => {
@@ -107,8 +95,7 @@ export const Search = () => {
     urlParams.set('searchTerm', sidebarData.searchTerm.trim())
     urlParams.set('fromDb', sidebarData.fromDb)
     urlParams.set('fromApi', sidebarData.fromApi)
-    urlParams.set('sort', sidebarData.sort)
-    urlParams.set('order', sidebarData.order)
+    urlParams.set('sort_order', sidebarData.sort_order)
     urlParams.set('temperament', sidebarData.temperament)
     const searchQuery = urlParams.toString()
     navigate(`/search?${searchQuery}`)
@@ -135,8 +122,7 @@ export const Search = () => {
       searchTerm: '',
       fromDb: false,
       fromApi: false,
-      sort: 'created_at',
-      order: 'desc',
+      sort_order: 'name_asc',
       temperament: ''
     })
     navigate('/search')
@@ -152,8 +138,8 @@ export const Search = () => {
 
   return (
     <div className="flex flex-col md:flex-row">
-      <div className="p-7 border-slate-300 border-b-2 md:border-r-2 md:min-h-screen">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8 mt-5">
+      <div className="p-4 border-slate-300 border-b-2 md:border-r-2 md:min-h-screen">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6 mt-5">
           <div className="flex items-center gap-2 text-slate-700">
             <label className="whitespace-nowrap">Search Term:</label>
             <input type='text' id='searchTerm' placeholder="Search..." className="border rounded-lg p-3 w-full bg-slate-100 focus: outline-none"
@@ -181,22 +167,29 @@ export const Search = () => {
           </div>
           <div className="flex items-center gap-2 text-slate-700">
             <label>Temperament:</label>
-            <select onChange={handleTemperamentChange} id='temperament' className="border rounded-lg p-3" value={sidebarData.temperament}>
+            <select onChange={handleChange} id='temperament' className="border rounded-lg p-3" value={sidebarData.temperament}>
               <option value={'All'}>All</option>
               {temperaments.map(temp => (
                 <option key={temp._id} value={temp.name}>{temp.name}</option>
               ))}
             </select>
           </div>
+          <div className="flex items-center gap-2 text-slate-700">
+            <label>Order by:</label>
+            <select onChange={handleChange} id='sort_order' className="border rounded-lg p-3" value={sidebarData.sort_order} >
+              <option value='name_asc'>A to Z</option>
+              <option value='name_desc'>Z to A</option>
+            </select>
+          </div>
           <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95">Search</button>
           <button onClick={handleClear} className="bg-slate-400 text-white p-3 rounded-lg uppercase hover:opacity-95">Clear</button>
-          <button onClick={handleCreate} className="bg-green-800 text-white p-3 rounded-lg uppercase hover:opacity-95 my-10 flex justify-center items-center">Post your Dog</button>
+          <button onClick={handleCreate} className="bg-green-800 text-white p-3 rounded-lg uppercase hover:opacity-95 my-7 flex justify-center items-center">Post your Dog</button>
         </form>
        
       </div>
       <div className="flex-1">
         <h1 className="text-3xl font-semibold border-b p-6 mt-7">Results:</h1>
-        <div className="p-7 flex flex-wrap gap-4">
+        <div className="p-3 flex flex-wrap gap-3">
           {
             !loading && dogs.length === undefined &&
             <p className="text-xl text-slate-700">
